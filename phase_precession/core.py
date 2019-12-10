@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import fminbound
 from pycircstat import rayleigh, corrcc
-from corr_cc import corr_cc, corr_cc_uniform
+from .corr_cc import corr_cc, corr_cc_uniform
 
 
 def model(x, slope, phi0):
