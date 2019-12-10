@@ -1,6 +1,11 @@
 import numpy as np
 from scipy.optimize import fminbound
-from pycircstat import rayleigh, corrcc, corrcl
+from pycircstat import rayleigh, corrcc
+from corr_cc import corr_cc, corr_cc_uniform
+
+
+def model(x, slope, phi0):
+    return 2 * np.pi * slope * x + phi0
 
 
 def goodness(x, phase, slope):
@@ -17,7 +22,7 @@ def summed_vector(x, phase, slope):
     Returns the two components of a vector,
     which is the summed difference between a linear function and the data points.
     '''
-    ph = phase - 2 * np.pi * x * slope  # phase difference
+    ph = phase - model(x, slope, 0)  # phase difference
     g_cos = np.sum(np.cos(ph))       # sum up phase differences
     g_sin = np.sum(np.sin(ph))
     return g_cos, g_sin
@@ -95,7 +100,7 @@ def cl_regression(x, phase, min_slope, max_slope):
     return phi0, slope, R
 
 
-def cl_corr(x, phase, min_slope, max_slope, ci=.05, bootstrap_iter=1000):
+def cl_corr(x, phase, min_slope, max_slope, ci=.05, bootstrap_iter=1000, return_pval=False):
     '''
     Function to (1) fit a line to circular-linear data and (2) determine
     the circular-linear correlation coefficient
@@ -118,6 +123,8 @@ def cl_corr(x, phase, min_slope, max_slope, ci=.05, bootstrap_iter=1000):
         level of confidence desired, e.g. .05 for 95 % confidence
     bootstrap_iter : int
         number of bootstrap iterations (number of samples if None)
+    return_pval : bool
+        return pvalue instead of confidence interval
 
     See also
     --------
@@ -127,7 +134,7 @@ def cl_corr(x, phase, min_slope, max_slope, ci=.05, bootstrap_iter=1000):
     -------
         circ_lin_corr : float
             circular-linear correlation coefficient
-        ci : array
+        ci/pval : array
             confidence interval
         slope : float
             slope of the fitted line in rad
@@ -139,7 +146,15 @@ def cl_corr(x, phase, min_slope, max_slope, ci=.05, bootstrap_iter=1000):
     phi0, slope, RR = cl_regression(x, phase, min_slope, max_slope) # fit line to data
     circ_x = np.mod(2 * np.pi * abs(slope) * x, 2 * np.pi) # convert linear variable to circular one
 
-    circ_lin_corr, ci_out = corrcc(circ_x, phase, ci=ci, bootstrap_iter=bootstrap_iter)
-    # circ_lin_corr, ci_out = corrcl(phase, x, ci=ci, bootstrap_iter=bootstrap_iter)
-
-    return circ_lin_corr, ci_out, slope, phi0, RR
+    if return_pval:
+        p_uniform = 0.5
+        pval_x = rayleigh(circ_x)
+        pval_y = rayleigh(circ_y)
+        if (pval_x > p_uniform) or (pval_y > p_uniform):
+            circ_lin_corr, pval, _ = corr_cc_uniform(circ_x, circ_y)
+        else:
+            circ_lin_corr, pval, _ = corr_cc(circ_x, circ_y)
+        return circ_lin_corr, pval, slope, phi0, RR
+    else:
+        circ_lin_corr, ci_out = corrcc(circ_x, phase, ci=ci, bootstrap_iter=bootstrap_iter)
+        return circ_lin_corr, ci_out, slope, phi0, RR
