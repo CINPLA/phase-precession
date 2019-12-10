@@ -149,11 +149,11 @@ def cl_corr(x, phase, min_slope, max_slope, ci=.05, bootstrap_iter=1000, return_
     if return_pval:
         p_uniform = 0.5
         pval_x = rayleigh(circ_x)
-        pval_y = rayleigh(circ_y)
+        pval_y = rayleigh(phase)
         if (pval_x > p_uniform) or (pval_y > p_uniform):
-            circ_lin_corr, pval, _ = corr_cc_uniform(circ_x, circ_y)
+            circ_lin_corr, pval, _ = corr_cc_uniform(circ_x, phase)
         else:
-            circ_lin_corr, pval, _ = corr_cc(circ_x, circ_y)
+            circ_lin_corr, pval, _ = corr_cc(circ_x, phase)
         return circ_lin_corr, pval, slope, phi0, RR
     else:
         circ_lin_corr, ci_out = corrcc(circ_x, phase, ci=ci, bootstrap_iter=bootstrap_iter)
