@@ -38,7 +38,7 @@ def corr_cc(alpha, beta):
 	l02 = mean(np.sin(beta - beta_bar)**2)
 	l22 = mean((np.sin(alpha - alpha_bar)**2) * (np.sin(beta - beta_bar)**2))
 
-	ts = sqrt((n * l20 * l02) / l22) * rho
+	ts = np.sqrt((n * l20 * l02) / l22) * rho
 	pval = 2 * (1 - norm.cdf(abs(ts)))
 
 	return rho, pval, ts
@@ -89,6 +89,6 @@ def corr_cc_uniform(a, b):
 	l02 = mean(np.sin(b - b_bar)**2)
 	l22 = mean((np.sin(a - a_bar)**2) * (np.sin(b - b_bar)**2))
 
-	ts = sqrt((n * l20 * l02) / l22) * rho
+	ts = np.sqrt((n * l20 * l02) / l22) * rho
 	p = 2 * (1 - norm.cdf(abs(ts)))
 	return rho, p, ts
