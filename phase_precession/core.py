@@ -84,7 +84,10 @@ def cl_regression(x, phase, min_slope, max_slope):
     def func(opt_slope):
         return - goodness(x, phase, opt_slope)
 
-    slope = fminbound(func, min_slope, max_slope)
+    slope, fval, lerr, nfunc = fminbound(func, min_slope, max_slope,
+                                         full_output=True)
+    if lerr:
+        print('Minimization did not converge')
 
     # Given the best `slope' we can explicitly calculate the goodness of the
     # fit ...
